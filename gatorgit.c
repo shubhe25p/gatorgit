@@ -100,6 +100,7 @@ int gatorgit_add(const char *filename) {
 
 int gatorgit_rm(const char *filename) {
   /* COMPLETE THE REST */
+
   
 }
 
@@ -143,6 +144,22 @@ int gatorgit_commit(const char *msg) {
 
 int gatorgit_status() {
   /* COMPLETE THE REST */
+  FILE *findex = fopen(".gatorgit/.index", "r");
+
+  if(findex == NULL){
+    findex = fopen("./gatorgit/.index", "w");
+  }
+  char line[FILENAME_SIZE];
+  printf("Tracked files: \n\n");
+  int cnt=0;
+  while(fgets(line, sizeof(line), findex)){
+    strtok(line, "\n");
+    printf("\t%s\n", line);
+    cnt++;
+  }
+  printf("\n%d files in total", cnt);
+  fclose(findex);
+  return 0;
   
 }
 
