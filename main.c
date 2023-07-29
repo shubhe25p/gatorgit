@@ -21,7 +21,7 @@ int check_filename(const char* filename) {
     return 0;
 
   if (filename[0] == '.')
-    return 0;
+    return 1;
 
   struct stat s;
   int ret_code = stat(filename, &s);

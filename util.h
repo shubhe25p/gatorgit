@@ -86,3 +86,11 @@ static void read_string_from_file(const char* filename, char* str, int size) {
   int real_size = fread(str, 1, size, fin);
   fclose(fin);
 }
+
+static int getlength(const char* msg){
+  int i = 0;
+  while(msg[i] != '\0'){
+    i++;
+  }
+  return i;
+}
