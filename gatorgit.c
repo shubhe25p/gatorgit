@@ -48,9 +48,10 @@ int gatorgit_init(void) {
 
   FILE *findex = fopen(".gatorgit/.index", "w");
   fclose(findex);
+  FILE *fprev = fopen(".gatorgit/.prev", "w");
 
-  write_string_to_file(".gatorgit/.prev", "0000000000000000000000000000000000000000");
-
+  fprintf(fprev, "%s\n", "0000000000000000000000000000000000000000");
+  // write_string_to_file(".gatorgit/.prev", "0000000000000000000000000000000000000000");
   return 0;
 }
 
@@ -238,9 +239,8 @@ int gatorgit_commit(const char *msg) {
 
   char commit_id[COMMIT_ID_SIZE];
   read_string_from_file(".gatorgit/.prev", commit_id, COMMIT_ID_SIZE);
-  printf("%s\n", commit_id);
   next_commit_id(commit_id);
-  printf("%s\n", commit_id);
+
   /* COMPLETE THE REST */
 
   char new_dir[COMMIT_ID_SIZE+40] = ".gatorgit/";
@@ -254,9 +254,11 @@ int gatorgit_commit(const char *msg) {
   new_dir[strlen(new_dir)-6] = '\0';
   const char *msg_dir = strcat(new_dir, "/.msg");
   FILE *fmsg = fopen(msg_dir, "w");
+  // write_string_to_file(fmsg, msg);
   fprintf(fmsg, "%s\n", msg);
   fclose(fmsg);
   FILE *fprev = fopen(".gatorgit/.prev", "w");
+  // write_string_to_file(fprev, commit_id);
   fprintf(fprev, "%s\n", commit_id);
   fclose(fprev);
   return 0;
@@ -307,11 +309,9 @@ int gatorgit_log() {
   char commit_id[COMMIT_ID_SIZE];
   read_string_from_file(".gatorgit/.prev", commit_id, COMMIT_ID_SIZE);
   printf("\n");
-  // read_string_from_file(".gatorgit/1111111111111111111111111111111111111111/.prev", commit_id, COMMIT_ID_SIZE);
-  // printf("%s\n", commit_id);
-  while(strcmp(commit_id, FIRST_COMMIT_ID) != 0){
+  while(strcmp(commit_id, "0000000000000000000000000000000000000000\n")){
     printf("commit %s\n", commit_id);
-    char new_dir[COMMIT_ID_SIZE+90] = ".gatorgit/";
+    char new_dir[COMMIT_ID_SIZE] = ".gatorgit/";
     const char *commit_dir = strcat(new_dir, commit_id);
     const char *msg_dir = strcat(new_dir, "/.msg");
     FILE *fmsg = fopen(new_dir, "r");
