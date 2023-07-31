@@ -11,7 +11,7 @@
 #include "string.h"
 #define gatorgit_DIR_NAME_SIZE  9
 #define COMMIT_DIR_PATH_SIZE (gatorgit_DIR_NAME_SIZE + COMMIT_ID_SIZE)
-#define COMMIT_FILE_PATH_SIZE (COMMIT_DIR_PATH_SIZE + FILENAME_SIZE)
+#define COMMIT_FILE_PATH_SIZE 100
 
 /* Implementation Notes:
  *
@@ -48,10 +48,7 @@ int gatorgit_init(void) {
 
   FILE *findex = fopen(".gatorgit/.index", "w");
   fclose(findex);
-  FILE *fprev = fopen(".gatorgit/.prev", "w");
-
-  fprintf(fprev, "%s\n", "0000000000000000000000000000000000000000");
-  // write_string_to_file(".gatorgit/.prev", "0000000000000000000000000000000000000000");
+  write_string_to_file(".gatorgit/.prev", "0000000000000000000000000000000000000000");
   return 0;
 }
 
@@ -123,12 +120,6 @@ int gatorgit_add(const char *filename) {
 }
 
 
-/* gatorgit rm <filename>
- *
- * See "Step 2" in the homework 1 spec.
- *
- */
-
 int gatorgit_rm(const char *filename) {
   /* COMPLETE THE REST */
   FILE *findex = fopen(".gatorgit/.index", "r");
@@ -162,12 +153,6 @@ int gatorgit_rm(const char *filename) {
   fs_mv(".gatorgit/.newindex", ".gatorgit/.index");
   
 }
-
-/* gatorgit commit -m <msg>
- *
- * See "Step 3" in the homework 1 spec.
- *
- */
 
 const char *golden_gator = "GOLDEN GATOR!";
 
@@ -241,10 +226,9 @@ int gatorgit_commit(const char *msg) {
   read_string_from_file(".gatorgit/.prev", commit_id, COMMIT_ID_SIZE);
   next_commit_id(commit_id);
 
-  /* COMPLETE THE REST */
-
-  char new_dir[COMMIT_ID_SIZE+40] = ".gatorgit/";
+  char new_dir[COMMIT_FILE_PATH_SIZE] = ".gatorgit/";
   const char *commit_dir = strcat(new_dir, commit_id);
+  printf("%s\n", commit_id);
   fs_mkdir(commit_dir);
   const char *index_dir = strcat(new_dir, "/.index");
   fs_cp(".gatorgit/.index", index_dir);
@@ -253,26 +237,14 @@ int gatorgit_commit(const char *msg) {
   fs_cp(".gatorgit/.prev", prev_dir);
   new_dir[strlen(new_dir)-6] = '\0';
   const char *msg_dir = strcat(new_dir, "/.msg");
-  FILE *fmsg = fopen(msg_dir, "w");
-  // write_string_to_file(fmsg, msg);
-  fprintf(fmsg, "%s\n", msg);
-  fclose(fmsg);
-  FILE *fprev = fopen(".gatorgit/.prev", "w");
-  // write_string_to_file(fprev, commit_id);
-  fprintf(fprev, "%s\n", commit_id);
-  fclose(fprev);
+  write_string_to_file(msg_dir, msg);
+  write_string_to_file(".gatorgit/.prev", commit_id);
   return 0;
 
 }
 
-/* gatorgit status
- *
- * See "Step 1" in the homework 1 spec.
- *
- */
 
 int gatorgit_status() {
-  /* COMPLETE THE REST */
   FILE *findex;
 
   findex = fopen(".gatorgit/.index", "r");
@@ -298,31 +270,27 @@ int gatorgit_status() {
   
 }
 
-/* gatorgit log
- *
- * See "Step 4" in the homework 1 spec.
- *
- */
-
 int gatorgit_log() {
   /* COMPLETE THE REST */
   char commit_id[COMMIT_ID_SIZE];
   read_string_from_file(".gatorgit/.prev", commit_id, COMMIT_ID_SIZE);
+  if(!strcmp(commit_id, "0000000000000000000000000000000000000000")){
+    fprintf(stderr, "ERROR: No commits yet\n");
+    return 1;
+  }
   printf("\n");
-  while(strcmp(commit_id, "0000000000000000000000000000000000000000\n")){
+  while(strcmp(commit_id, "0000000000000000000000000000000000000000")){
     printf("commit %s\n", commit_id);
-    char new_dir[COMMIT_ID_SIZE] = ".gatorgit/";
+    char new_dir[COMMIT_FILE_PATH_SIZE] = ".gatorgit/";
     const char *commit_dir = strcat(new_dir, commit_id);
     const char *msg_dir = strcat(new_dir, "/.msg");
-    FILE *fmsg = fopen(new_dir, "r");
     char msg[MSG_SIZE];
-    fgets(msg, sizeof(msg), fmsg);
-    strtok(msg, "\n");
+    read_string_from_file(msg_dir, msg, MSG_SIZE);
     printf("\t%s\n\n", msg);
-    fclose(fmsg);
     new_dir[strlen(new_dir)-5] = '\0';
     const char *prev_dir = strcat(new_dir, "/.prev");
     read_string_from_file(prev_dir, commit_id, COMMIT_ID_SIZE);   
   }
+  return 0;
 
 }
